@@ -1,0 +1,63 @@
+<!-- chat.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div>
+        <h1>Chat</h1>
+        <ul id="messageList">
+            <% messages.forEach(message=> { %>
+                <li>
+                    <%= message.username %>: <%= message.text %>
+                </li>
+                <% }); %>
+        </ul>
+        <form id="messageForm">
+            <input type="text" id="messageInput" placeholder="Type your message...">
+            <button type="button" onclick="sendMessage()">Send</button>
+        </form>
+    </div>
+
+    <script>
+        const socket = io();
+
+        // Emit join event with username
+        socket.emit('join', '<%= username %>');
+
+        // Handle newMessage event
+        socket.on('newMessage', (data) => {
+            // Update the UI with the new message
+            const messageList = document.getElementById('messageList');
+            const newMessage = document.createElement('li');
+            newMessage.textContent = `${data.username}: "${data.text}"`;
+            messageList.appendChild(newMessage);
+        });
+
+        // Function to send a new message
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const messageText = messageInput.value;
+
+            console.log('User ID:', '<%= userId %>');
+
+            socket.emit('sendMessage', {
+                text: messageText,
+                userId: '<%= userId %>'
+            });
+
+            // Clear the input field
+            messageInput.value = '';
+        }
+    </script>
+</body>
+
+</html>
